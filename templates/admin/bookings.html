@@ -1,0 +1,253 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Bookings</h1>
+    <a href="{{ url_for('create_booking') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Add Booking
+    </a>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="card-title mb-0">All Bookings</h4>
+    </div>
+    <div class="card-body p-0">
+        {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Vehicle</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                            <tr>
+                                <td>{{ booking.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-user-circle fa-2x me-2 text-muted"></i>
+                                        <div>
+                                            <div>{{ booking.customer.username }}</div>
+                                            <small class="text-muted">{{ booking.customer.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ booking.service_type.name }}</td>
+                                <td>
+                                    {% if booking.vehicle %}
+                                        <a href="{{ url_for('vehicle_detail', vehicle_id=booking.vehicle.id) }}">
+                                            {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ booking.booking_date.strftime('%d %b, %Y') }} at {{ booking.booking_time.strftime('%I:%M %p') }}</td>
+                                <td>
+                                    {% if booking.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% elif booking.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% elif booking.status == 'completed' %}
+                                        <span class="badge bg-info">Completed</span>
+                                    {% elif booking.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ booking.created_at.strftime('%d %b, %Y') }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewBookingModal{{ booking.id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#updateBookingModal{{ booking.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- View Booking Modal -->
+                                    <div class="modal fade" id="viewBookingModal{{ booking.id }}" tabindex="-1" aria-labelledby="viewBookingModalLabel{{ booking.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="viewBookingModalLabel{{ booking.id }}">Booking Details #{{ booking.id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <strong>Customer:</strong>
+                                                        <p>{{ booking.customer.first_name }} {{ booking.customer.last_name }} ({{ booking.customer.username }})</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Contact:</strong>
+                                                        <p>{{ booking.customer.email }}<br>{{ booking.customer.phone }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Service:</strong>
+                                                        <p>{{ booking.service_type.name }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Vehicle:</strong>
+                                                        <p>
+                                                            {% if booking.vehicle %}
+                                                                {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }} ({{ booking.vehicle.year }})
+                                                            {% else %}
+                                                                Not specified
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Date & Time:</strong>
+                                                        <p>{{ booking.booking_date.strftime('%A, %d %B, %Y') }} at {{ booking.booking_time.strftime('%I:%M %p') }}</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Status:</strong>
+                                                        <p>
+                                                            {% if booking.status == 'pending' %}
+                                                                <span class="badge bg-warning">Pending</span>
+                                                            {% elif booking.status == 'confirmed' %}
+                                                                <span class="badge bg-success">Confirmed</span>
+                                                            {% elif booking.status == 'completed' %}
+                                                                <span class="badge bg-info">Completed</span>
+                                                            {% elif booking.status == 'cancelled' %}
+                                                                <span class="badge bg-danger">Cancelled</span>
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <strong>Notes:</strong>
+                                                        <p>{{ booking.notes or 'No notes provided' }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Update Booking Modal -->
+                                    <div class="modal fade" id="updateBookingModal{{ booking.id }}" tabindex="-1" aria-labelledby="updateBookingModalLabel{{ booking.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="updateBookingModalLabel{{ booking.id }}">Update Booking #{{ booking.id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="{{ url_for('update_booking_status', booking_id=booking.id) }}" method="POST">
+                                                        <div class="mb-3">
+                                                            <label for="status{{ booking.id }}" class="form-label">Status</label>
+                                                            <select name="status" id="status{{ booking.id }}" class="form-select">
+                                                                <option value="pending" {% if booking.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                                <option value="confirmed" {% if booking.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                                                <option value="completed" {% if booking.status == 'completed' %}selected{% endif %}>Completed</option>
+                                                                <option value="cancelled" {% if booking.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="d-grid">
+                                                            <button type="submit" class="btn btn-primary">Update Status</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-4x mb-3 text-muted"></i>
+                <h4>No Bookings Found</h4>
+                <p class="text-muted mb-4">There are no service bookings in the system yet.</p>
+                <a href="{{ url_for('create_booking') }}" class="btn btn-primary">Create First Booking</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Booking Status Overview</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ bookings|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                                <p class="text-warning mb-0">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ bookings|selectattr('status', 'equalto', 'confirmed')|list|length }}</h3>
+                                <p class="text-success mb-0">Confirmed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ bookings|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                                <p class="text-info mb-0">Completed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ bookings|selectattr('status', 'equalto', 'cancelled')|list|length }}</h3>
+                                <p class="text-danger mb-0">Cancelled</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Services Breakdown</h4>
+            </div>
+            <div class="card-body">
+                {% set services = Service.query.all() %}
+                <div class="row">
+                    {% for service in services %}
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="py-3">
+                                    <h3 class="mb-0">{{ bookings|selectattr('service_id', 'equalto', service.id)|list|length }}</h3>
+                                    <p class="text-primary mb-0">{{ service.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

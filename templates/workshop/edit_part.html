@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Edit Part: {{ part.name }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('parts_inventory') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Inventory</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Edit Part Details</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('edit_part', part_id=part.id) }}">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control") }}
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.part_number.label(class="form-label") }}
+                                {{ form.part_number(class="form-control") }}
+                                {% if form.part_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.part_number.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">Unique identifier for this part</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows="3") }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.cost_price.label(class="form-label") }}
+                                {{ form.cost_price(class="form-control") }}
+                                {% if form.cost_price.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.cost_price.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">Cost to the garage</div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.retail_price.label(class="form-label") }}
+                                {{ form.retail_price(class="form-control") }}
+                                {% if form.retail_price.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.retail_price.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">Price charged to customer</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.quantity_in_stock.label(class="form-label") }}
+                                {{ form.quantity_in_stock(class="form-control") }}
+                                {% if form.quantity_in_stock.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.quantity_in_stock.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select") }}
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.category.errors %}
+                                    <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {{ form.submit(class="btn btn-success w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Usage History -->
+    <div class="row mt-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3>Usage History</h3>
+                </div>
+                <div class="card-body">
+                    {% if part.used_in_jobs %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Job #</th>
+                                    <th>Date Used</th>
+                                    <th>Quantity</th>
+                                    <th>Price at Time</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usage in part.used_in_jobs|sort(attribute='created_at', reverse=True) %}
+                                <tr>
+                                    <td><a href="{{ url_for('job_detail', job_id=usage.job_id) }}">Job #{{ usage.job_id }}</a></td>
+                                    <td>{{ usage.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ usage.quantity }}</td>
+                                    <td>{{ usage.unit_price | currency }}</td>
+                                    <td>{{ (usage.unit_price * usage.quantity) | currency }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">This part has not been used in any jobs yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,296 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">Edit Vehicle</h3>
+                <span class="badge bg-light text-dark">ID: {{ vehicle.id }}</span>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="" enctype="multipart/form-data" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Basic Information</h4>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.make_id.label(class="form-label") }}
+                            {% if form.make_id.errors %}
+                                {{ form.make_id(class="form-select is-invalid", id="makeSelect") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.make_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.make_id(class="form-select", id="makeSelect") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.model_id.label(class="form-label") }}
+                            {% if form.model_id.errors %}
+                                {{ form.model_id(class="form-select is-invalid", id="modelSelect") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.model_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.model_id(class="form-select", id="modelSelect") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.year.label(class="form-label") }}
+                            {% if form.year.errors %}
+                                {{ form.year(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.year.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.year(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Features & Specifications</h4>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            {{ form.price.label(class="form-label") }}
+                            {% if form.price.errors %}
+                                {{ form.price(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.price.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.price(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            {{ form.mileage.label(class="form-label") }}
+                            {% if form.mileage.errors %}
+                                {{ form.mileage(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mileage.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.mileage(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            {{ form.color.label(class="form-label") }}
+                            {% if form.color.errors %}
+                                {{ form.color(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.color.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.color(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            {{ form.condition.label(class="form-label") }}
+                            {% if form.condition.errors %}
+                                {{ form.condition(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.condition.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.condition(class="form-select") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.fuel_type.label(class="form-label") }}
+                            {% if form.fuel_type.errors %}
+                                {{ form.fuel_type(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fuel_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.fuel_type(class="form-select") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.transmission.label(class="form-label") }}
+                            {% if form.transmission.errors %}
+                                {{ form.transmission(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.transmission.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.transmission(class="form-select") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Location & Description</h4>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.location.label(class="form-label") }}
+                            {% if form.location.errors %}
+                                {{ form.location(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.location.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.location(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.country.label(class="form-label") }}
+                            {% if form.country.errors %}
+                                {{ form.country(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.country.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.country(class="form-select") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {% if form.description.errors %}
+                                {{ form.description(class="form-control is-invalid", rows=5) }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.description(class="form-control", rows=5) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Current Photos</h4>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            {% if vehicle.image_urls %}
+                                <div class="row">
+                                    {% for image_url in vehicle.image_urls.split(',') %}
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card">
+                                                <img src="{{ image_url }}" class="card-img-top" alt="Vehicle Image">
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">No images have been uploaded for this vehicle.</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            {{ form.images.label(class="form-label") }}
+                            {% if form.images.errors %}
+                                {{ form.images(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.images.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.images(class="form-control") }}
+                            {% endif %}
+                            <small class="text-muted">Upload additional photos of your vehicle.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const makeSelect = document.getElementById('makeSelect');
+    const modelSelect = document.getElementById('modelSelect');
+    
+    // Function to update models based on selected make
+    function updateModels() {
+        const makeId = makeSelect.value;
+        const currentModelId = '{{ vehicle.model_id }}';
+        
+        // Clear current models
+        modelSelect.innerHTML = '';
+        
+        if (makeId) {
+            // Fetch models for selected make
+            fetch(`/api/models/${makeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Add models to dropdown
+                    data.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.id;
+                        option.textContent = model.name;
+                        if (model.id == currentModelId) {
+                            option.selected = true;
+                        }
+                        modelSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching models:', error));
+        } else {
+            // If no make selected, show message
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Select a make first';
+            modelSelect.appendChild(option);
+        }
+    }
+    
+    // Update models when make changes
+    makeSelect.addEventListener('change', updateModels);
+    
+    // Initial update
+    updateModels();
+});
+</script>
+{% endblock %}

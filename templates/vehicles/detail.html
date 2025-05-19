@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('vehicle_list') }}">Vehicles</a></li>
+            <li class="breadcrumb-item active">{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="image-gallery mb-4">
+                    {% if vehicle.image_urls %}
+                        <div id="vehicleImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image_url in vehicle.image_urls.split(',') %}
+                                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                        <img src="{{ image_url }}" class="d-block w-100" alt="Vehicle Image">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if vehicle.image_urls.split(',')|length > 1 %}
+                                <button class="carousel-control-prev" type="button" data-bs-target="#vehicleImageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#vehicleImageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                                
+                                <div class="carousel-indicators position-static mt-2">
+                                    {% for image_url in vehicle.image_urls.split(',') %}
+                                        <button type="button" data-bs-target="#vehicleImageCarousel" data-bs-slide-to="{{ loop.index0 }}" 
+                                                class="{% if loop.first %}active{% endif %}" 
+                                                aria-current="{% if loop.first %}true{% endif %}" 
+                                                aria-label="Slide {{ loop.index }}">
+                                            <img src="{{ image_url }}" class="d-block w-100 img-thumbnail" alt="Thumbnail">
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <img src="https://via.placeholder.com/800x400?text=No+Images+Available" class="img-fluid rounded" alt="No Images Available">
+                    {% endif %}
+                </div>
+                
+                <h2 class="mb-2">{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }} {{ vehicle.year }}</h2>
+                
+                <div class="d-flex flex-wrap mb-3">
+                    <span class="badge bg-primary me-2 mb-1">{{ vehicle.condition|title }}</span>
+                    <span class="badge bg-secondary me-2 mb-1">{{ vehicle.transmission|title }}</span>
+                    <span class="badge bg-secondary me-2 mb-1">{{ vehicle.fuel_type|title }}</span>
+                    <span class="badge bg-secondary me-2 mb-1">{{ vehicle.country }}</span>
+                </div>
+                
+                <p class="mb-4">
+                    <i class="fas fa-map-marker-alt text-danger me-1"></i> 
+                    <span class="text-muted">Location:</span> {{ vehicle.location }}
+                </p>
+                
+                <div class="row mb-4">
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="feature-item text-center">
+                            <i class="fas fa-calendar-alt fa-lg mb-2 text-primary"></i>
+                            <h6 class="mb-0">Year</h6>
+                            <p class="mb-0 text-muted">{{ vehicle.year }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="feature-item text-center">
+                            <i class="fas fa-tachometer-alt fa-lg mb-2 text-primary"></i>
+                            <h6 class="mb-0">Mileage</h6>
+                            <p class="mb-0 text-muted">{{ vehicle.mileage|default('0') }} km</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="feature-item text-center">
+                            <i class="fas fa-palette fa-lg mb-2 text-primary"></i>
+                            <h6 class="mb-0">Color</h6>
+                            <p class="mb-0 text-muted">{{ vehicle.color|default('Not specified') }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="feature-item text-center">
+                            <i class="fas fa-gas-pump fa-lg mb-2 text-primary"></i>
+                            <h6 class="mb-0">Fuel Type</h6>
+                            <p class="mb-0 text-muted">{{ vehicle.fuel_type|title }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 class="mb-3">Description</h4>
+                <div class="mb-4">
+                    {% if vehicle.description %}
+                        {{ vehicle.description|safe }}
+                    {% else %}
+                        <p class="text-muted">No description provided.</p>
+                    {% endif %}
+                </div>
+                
+                <h4 class="mb-3">Need repairs or maintenance?</h4>
+                <p class="mb-3">Book a service appointment for this vehicle at our garage.</p>
+                <a href="{{ url_for('create_booking') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-tools me-1"></i> Book Service
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Price</h4>
+            </div>
+            <div class="card-body">
+                <h3 class="price-display mb-3">{{ vehicle.price|currency }}</h3>
+                
+                <div class="d-grid gap-2">
+                    {% if current_user.is_authenticated and current_user.id != vehicle.user_id %}
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#contactSellerModal">
+                            <i class="fas fa-envelope me-1"></i> Contact Seller
+                        </button>
+                    {% elif not current_user.is_authenticated %}
+                        <a href="{{ url_for('login') }}?next={{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login to Contact Seller
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('create_booking') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-tools me-1"></i> Book Service
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Seller Information</h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Seller:</strong> {{ vehicle.owner.username }}</p>
+                <p class="mb-1"><strong>Member since:</strong> {{ vehicle.owner.created_at.strftime('%B %Y') }}</p>
+                <p class="mb-3"><strong>Location:</strong> {{ vehicle.location }}</p>
+                
+                {% if current_user.is_authenticated and current_user.id != vehicle.user_id %}
+                    <div class="d-grid">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#contactSellerModal">
+                            <i class="fas fa-envelope me-1"></i> Contact Seller
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Safety Tips</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Meet in a public place</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Test drive before buying</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Verify vehicle documents</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Consider pre-purchase inspection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if related_vehicles %}
+    <div class="mt-5">
+        <h3 class="mb-4">Similar Vehicles</h3>
+        <div class="row">
+            {% for related in related_vehicles %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 vehicle-card">
+                        <div class="card-img-container">
+                            {% if related.image_urls %}
+                                <img src="{{ related.image_urls.split(',')[0] }}" class="card-img-top" alt="{{ related.vehicle_make.name }} {{ related.vehicle_model.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/350x200?text=No+Image" class="card-img-top" alt="No Image">
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ related.vehicle_make.name }} {{ related.vehicle_model.name }}</h5>
+                            <p class="card-subtitle text-muted mb-2">{{ related.year }} • {{ related.mileage|default('0') }} km</p>
+                            <p class="price mb-2 fw-bold">{{ related.price|currency }}</p>
+                            <p class="location small"><i class="fas fa-map-marker-alt"></i> {{ related.location }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('vehicle_detail', vehicle_id=related.id) }}" class="btn btn-outline-primary w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Contact Seller Modal -->
+<div class="modal fade" id="contactSellerModal" tabindex="-1" aria-labelledby="contactSellerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactSellerModalLabel">Contact Seller</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="messageSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="messageSubject" value="Inquiry about {{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }} {{ vehicle.year }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageBody" class="form-label">Message</label>
+                        <textarea class="form-control" id="messageBody" rows="5" placeholder="Type your message here..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

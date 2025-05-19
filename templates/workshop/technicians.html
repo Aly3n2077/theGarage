@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Workshop Staff</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('workshop_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mechanics -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Mechanics</h3>
+                </div>
+                <div class="card-body">
+                    {% if mechanics %}
+                    <div class="row">
+                        {% for mechanic in mechanics %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ mechanic.full_name() }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ mechanic.email }}</h6>
+                                    {% if mechanic.phone %}
+                                    <p class="card-text"><strong>Phone:</strong> {{ mechanic.phone }}</p>
+                                    {% endif %}
+                                    {% if mechanic.specialization %}
+                                    <p class="card-text"><strong>Specialization:</strong> {{ mechanic.specialization }}</p>
+                                    {% endif %}
+                                    <p class="card-text"><strong>Country:</strong> {{ 'South Africa' if mechanic.country == 'SA' else 'Zimbabwe' }}</p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Member since {{ mechanic.created_at.strftime('%Y-%m-%d') }}</small>
+                                        <span class="badge bg-success">{{ mechanic.assigned_jobs|length }} Jobs</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center">No mechanics registered in the system.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Managers -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3>Workshop Managers</h3>
+                </div>
+                <div class="card-body">
+                    {% if managers %}
+                    <div class="row">
+                        {% for manager in managers %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ manager.full_name() }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ manager.email }}</h6>
+                                    <p class="card-text"><strong>Role:</strong> {{ manager.role.replace('_', ' ').title() }}</p>
+                                    {% if manager.phone %}
+                                    <p class="card-text"><strong>Phone:</strong> {{ manager.phone }}</p>
+                                    {% endif %}
+                                    <p class="card-text"><strong>Country:</strong> {{ 'South Africa' if manager.country == 'SA' else 'Zimbabwe' }}</p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Member since {{ manager.created_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center">No managers registered in the system.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.is_admin %}
+    <!-- Admin Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h3>Admin Actions</h3>
+                </div>
+                <div class="card-body">
+                    <p>As an administrator, you can manage user roles through the Admin Dashboard.</p>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go to Admin Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

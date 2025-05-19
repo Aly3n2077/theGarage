@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Parts Inventory</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('workshop_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <div>
+                    <a href="{{ url_for('create_part') }}" class="btn btn-success">Add New Part</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Parts Inventory Table -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Inventory List</h3>
+                </div>
+                <div class="card-body">
+                    {% if parts %}
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="parts-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Part Number</th>
+                                    <th>Category</th>
+                                    <th>Cost Price</th>
+                                    <th>Retail Price</th>
+                                    <th>In Stock</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for part in parts %}
+                                <tr>
+                                    <td>{{ part.name }}</td>
+                                    <td>{{ part.part_number }}</td>
+                                    <td>{{ part.category.replace('_', ' ').title() }}</td>
+                                    <td>{{ part.cost_price | currency }}</td>
+                                    <td>{{ part.retail_price | currency }}</td>
+                                    <td>
+                                        {% if part.quantity_in_stock <= 0 %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                        {% elif part.quantity_in_stock < 5 %}
+                                        <span class="badge bg-warning text-dark">Low: {{ part.quantity_in_stock }}</span>
+                                        {% else %}
+                                        <span class="badge bg-success">{{ part.quantity_in_stock }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('edit_part', part_id=part.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No parts in inventory. <a href="{{ url_for('create_part') }}">Add your first part</a>.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inventory Stats -->
+    {% if parts %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Parts</h5>
+                    <p class="card-text display-4">{{ parts|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Inventory Value</h5>
+                    <p class="card-text display-4">{{ parts|sum(attribute='cost_price') | currency }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Potential Revenue</h5>
+                    <p class="card-text display-4">{{ parts|sum(attribute='retail_price') | currency }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#parts-table').DataTable({
+            "order": [[ 0, "asc" ]],
+            "pageLength": 25
+        });
+    });
+</script>
+{% endblock scripts %}
+{% endblock content %}

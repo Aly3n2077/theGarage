@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Users</h1>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-primary text-white">
+        <h4 class="card-title mb-0">All Users</h4>
+    </div>
+    <div class="card-body p-0">
+        {% if users %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Country</th>
+                            <th>Vehicles</th>
+                            <th>Bookings</th>
+                            <th>Joined</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.country }}</td>
+                                <td>{{ user.vehicles|length }}</td>
+                                <td>{{ user.bookings|length }}</td>
+                                <td>{{ user.created_at.strftime('%d %b, %Y') }}</td>
+                                <td>
+                                    {% if user.is_admin %}
+                                        <span class="badge bg-danger">Admin</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewUserModal{{ user.id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#toggleAdminModal{{ user.id }}">
+                                            <i class="fas fa-user-shield"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- View User Modal -->
+                                    <div class="modal fade" id="viewUserModal{{ user.id }}" tabindex="-1" aria-labelledby="viewUserModalLabel{{ user.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="viewUserModalLabel{{ user.id }}">User Details #{{ user.id }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Username:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.username }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Full Name:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.first_name }} {{ user.last_name }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Email:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.email }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Phone:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.phone or 'Not provided' }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Country:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.country }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Role:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {% if user.is_admin %}
+                                                                <span class="badge bg-danger">Admin</span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">User</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Joined:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.created_at.strftime('%d %B, %Y') }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Vehicles:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.vehicles|length }} vehicles
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-4">
+                                                            <strong>Bookings:</strong>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            {{ user.bookings|length }} bookings
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Toggle Admin Modal -->
+                                    <div class="modal fade" id="toggleAdminModal{{ user.id }}" tabindex="-1" aria-labelledby="toggleAdminModalLabel{{ user.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="toggleAdminModalLabel{{ user.id }}">
+                                                        {% if user.is_admin %}
+                                                            Remove Admin Rights
+                                                        {% else %}
+                                                            Grant Admin Rights
+                                                        {% endif %}
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>
+                                                        {% if user.is_admin %}
+                                                            Are you sure you want to remove admin rights from {{ user.username }}?
+                                                        {% else %}
+                                                            Are you sure you want to grant admin rights to {{ user.username }}?
+                                                        {% endif %}
+                                                    </p>
+                                                    <p class="text-danger">This action will change the user's permissions on the platform.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="#" method="POST" class="d-inline">
+                                                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                                                        <input type="hidden" name="action" value="{% if user.is_admin %}remove_admin{% else %}make_admin{% endif %}">
+                                                        <button type="submit" class="btn {% if user.is_admin %}btn-warning{% else %}btn-danger{% endif %}">
+                                                            {% if user.is_admin %}
+                                                                Remove Admin
+                                                            {% else %}
+                                                                Make Admin
+                                                            {% endif %}
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-4x mb-3 text-muted"></i>
+                <h4>No Users Found</h4>
+                <p class="text-muted mb-4">There are no users in the system yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">User Statistics</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ users|length }}</h3>
+                                <p class="text-primary mb-0">Total Users</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ users|selectattr('is_admin', 'equalto', true)|list|length }}</h3>
+                                <p class="text-danger mb-0">Admins</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Country Distribution</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ users|selectattr('country', 'equalto', 'SA')|list|length }}</h3>
+                                <p class="text-primary mb-0">South Africa</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <h3 class="mb-0">{{ users|selectattr('country', 'equalto', 'ZIM')|list|length }}</h3>
+                                <p class="text-primary mb-0">Zimbabwe</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

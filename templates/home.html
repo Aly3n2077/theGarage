@@ -1,0 +1,672 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero-section mb-5">
+    <div class="hero-content">
+        <div class="position-relative">
+            <div class="text-center mb-4">
+                <h1 class="mb-2">Find the right vehicle for you</h1>
+                <p class="lead">theGarage - Your ultimate automotive destination in South Africa and Zimbabwe</p>
+            </div>
+            
+            <!-- Search Section exactly like Cars.com -->
+            <div class="search-container">
+                <div class="search-tabs">
+                    <button class="btn active" id="shopCarsTab">Shop vehicles</button>
+                    <button class="btn" id="shopBikesTab">Shop motorbikes</button>
+                    <button class="btn" id="sellVehicleTab">Sell yours</button>
+                </div>
+                
+                <div class="search-form-container">
+                    <form action="{{ url_for('vehicle_list') }}" method="get" id="vehicle-search-form">
+                        <div class="row g-3">
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small">New/Used</label>
+                                <select class="form-select" name="condition">
+                                    <option value="">New & Used</option>
+                                    <option value="new">New</option>
+                                    <option value="used">Used</option>
+                                    <option value="certified">Certified Pre-Owned</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small">Make</label>
+                                <select class="form-select" name="make_id">
+                                    <option value="0">All Makes</option>
+                                    <!-- Options populated via JavaScript -->
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small">Model</label>
+                                <select class="form-select" name="model_id">
+                                    <option value="0">All Models</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small">Price</label>
+                                <select class="form-select" name="max_price">
+                                    <option value="">No Max Price</option>
+                                    <option value="5000">$5,000</option>
+                                    <option value="10000">$10,000</option>
+                                    <option value="15000">$15,000</option>
+                                    <option value="20000">$20,000</option>
+                                    <option value="25000">$25,000</option>
+                                    <option value="30000">$30,000</option>
+                                    <option value="35000">$35,000</option>
+                                    <option value="40000">$40,000</option>
+                                    <option value="45000">$45,000</option>
+                                    <option value="50000">$50,000</option>
+                                    <option value="60000">$60,000</option>
+                                    <option value="75000">$75,000</option>
+                                    <option value="100000">$100,000</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <label class="form-label small">Distance</label>
+                                <select class="form-select" name="distance">
+                                    <option value="">No Max Distance</option>
+                                    <option value="10">10 km</option>
+                                    <option value="25">25 km</option>
+                                    <option value="50" selected>50 km</option>
+                                    <option value="75">75 km</option>
+                                    <option value="100">100 km</option>
+                                    <option value="200">200 km</option>
+                                    <option value="500">500 km</option>
+                                    <option value="any">Any Distance</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <label class="form-label small">ZIP</label>
+                                <input type="text" class="form-control" name="location" placeholder="Enter ZIP or City" value="">
+                            </div>
+                            <div class="col-md-3 col-12">
+                                <button type="submit" class="btn-show-matches mt-4">Show Matches</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Auto News Section - Inspired by Cars.com with image -->
+            <div class="auto-news-container mt-5 mb-5">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="news-card p-4">
+                                <span class="text-muted small">theGarage News</span>
+                                <h3 class="mt-2 mb-3">Automotive & Motorcycle News</h3>
+                                <p class="mb-4">Stay informed about the latest trends in cars and motorbikes. Our experts provide insights to help you make the best vehicle decisions.</p>
+                                <div class="d-flex">
+                                    <a href="#" class="btn btn-outline-primary me-2">See all news</a>
+                                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-secondary">Book a service</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="rounded overflow-hidden news-image-container">
+                                <img src="https://via.placeholder.com/600x300" alt="Automotive News" class="img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Bar - Clean Modern Style -->
+            <div class="stats-bar-container container my-5">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <div class="stat-modern">
+                            <div class="stat-icon-modern">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="stat-count">{{ Vehicle.query.filter_by(vehicle_type='car').count() }}</div>
+                            <div class="stat-label">Cars Listed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <div class="stat-modern">
+                            <div class="stat-icon-modern">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="stat-count">{{ Vehicle.query.filter_by(vehicle_type='motorbike').count() }}</div>
+                            <div class="stat-label">Motorbikes</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4 mb-md-0">
+                        <div class="stat-modern">
+                            <div class="stat-icon-modern">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-count">{{ User.query.count() }}</div>
+                            <div class="stat-label">Happy Users</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-modern">
+                            <div class="stat-icon-modern">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <div class="stat-count">{{ Service.query.count() }}</div>
+                            <div class="stat-label">Service Types</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Cars.com Styling Elements */
+    .auto-news-container {
+        margin-top: 4rem;
+    }
+    
+    .news-card {
+        border-radius: 8px;
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+    
+    .news-image-container {
+        height: 100%;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .news-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    /* Modern Stats Bar */
+    .stats-bar-container {
+        padding: 2rem 0;
+    }
+    
+    .stat-modern {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem;
+    }
+    
+    .stat-icon-modern {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 6px 15px rgba(10, 87, 170, 0.2);
+    }
+    
+    .stat-count {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    body[data-bs-theme="dark"] .news-card {
+        background-color: var(--dark-card-bg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    body[data-bs-theme="dark"] .stat-icon-modern {
+        background-color: var(--accent-color);
+        box-shadow: 0 6px 15px rgba(135, 88, 255, 0.2);
+    }
+    
+    body[data-bs-theme="dark"] .stat-count {
+        color: var(--accent-light);
+    }
+    
+    /* Cars.com Popular Categories */
+    .popular-categories {
+        margin-top: 3rem;
+        margin-bottom: 3rem;
+    }
+    
+    .popular-categories h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+    }
+    
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 1rem;
+    }
+    
+    .category-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 1.5rem 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--secondary-color);
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        color: var(--primary-color);
+    }
+    
+    .category-card-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+    
+    .category-card-title {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    body[data-bs-theme="dark"] .category-card {
+        background-color: var(--dark-card-bg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+<script>
+    // Toggle between vehicle search tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopCarsTab = document.getElementById('shopCarsTab');
+        const shopBikesTab = document.getElementById('shopBikesTab');
+        const sellVehicleTab = document.getElementById('sellVehicleTab');
+        const searchForm = document.getElementById('vehicle-search-form');
+        
+        if(shopCarsTab && shopBikesTab && sellVehicleTab && searchForm) {
+            // Function to reset all tabs
+            function resetTabs() {
+                shopCarsTab.classList.remove('active');
+                shopBikesTab.classList.remove('active');
+                sellVehicleTab.classList.remove('active');
+            }
+            
+            shopCarsTab.addEventListener('click', function() {
+                resetTabs();
+                shopCarsTab.classList.add('active');
+                // Add vehicle_type=car parameter to filter for cars only
+                searchForm.action = "{{ url_for('vehicle_list') }}";
+                // Add hidden input for car type if not exists
+                let vehicleTypeInput = searchForm.querySelector('input[name="vehicle_type"]');
+                if (!vehicleTypeInput) {
+                    vehicleTypeInput = document.createElement('input');
+                    vehicleTypeInput.type = 'hidden';
+                    vehicleTypeInput.name = 'vehicle_type';
+                    searchForm.appendChild(vehicleTypeInput);
+                }
+                vehicleTypeInput.value = 'car';
+            });
+            
+            shopBikesTab.addEventListener('click', function() {
+                resetTabs();
+                shopBikesTab.classList.add('active');
+                // Add vehicle_type=motorbike parameter to filter for motorbikes only
+                searchForm.action = "{{ url_for('vehicle_list') }}";
+                // Add hidden input for motorbike type if not exists
+                let vehicleTypeInput = searchForm.querySelector('input[name="vehicle_type"]');
+                if (!vehicleTypeInput) {
+                    vehicleTypeInput = document.createElement('input');
+                    vehicleTypeInput.type = 'hidden';
+                    vehicleTypeInput.name = 'vehicle_type';
+                    searchForm.appendChild(vehicleTypeInput);
+                }
+                vehicleTypeInput.value = 'motorbike';
+            });
+            
+            sellVehicleTab.addEventListener('click', function() {
+                resetTabs();
+                sellVehicleTab.classList.add('active');
+                searchForm.action = "{{ url_for('create_vehicle') }}";
+            });
+        }
+        
+        // Load vehicle makes dynamically
+        fetch('/get_makes')
+            .then(response => response.json())
+            .then(data => {
+                const makeSelect = document.querySelector('select[name="make_id"]');
+                const modelSelect = document.querySelector('select[name="model_id"]');
+                
+                if(makeSelect) {
+                    data.forEach(make => {
+                        const option = document.createElement('option');
+                        option.value = make.id;
+                        option.textContent = make.name;
+                        makeSelect.appendChild(option);
+                    });
+                }
+                
+                // Setup model dropdown population based on make selection
+                if(makeSelect && modelSelect) {
+                    makeSelect.addEventListener('change', function() {
+                        const selectedMakeId = this.value;
+                        
+                        // Reset model dropdown
+                        modelSelect.innerHTML = '<option value="0">All Models</option>';
+                        
+                        if(selectedMakeId > 0) {
+                            // Fetch models for the selected make
+                            fetch(`/api/models/${selectedMakeId}`)
+                                .then(response => response.json())
+                                .then(modelData => {
+                                    modelData.forEach(model => {
+                                        const option = document.createElement('option');
+                                        option.value = model.id;
+                                        option.textContent = model.name;
+                                        modelSelect.appendChild(option);
+                                    });
+                                })
+                                .catch(error => console.error('Error loading models:', error));
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading makes:', error));
+    });
+</script>
+
+
+
+<section class="popular-categories container mb-5">
+    <h2>Popular Categories</h2>
+    
+    <!-- Car Categories -->
+    <h4 class="mt-4 mb-3">Cars</h4>
+    <div class="category-grid">
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='electric') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-bolt"></i></div>
+            <div class="category-card-title">Electric Cars</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='suv') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-car-side"></i></div>
+            <div class="category-card-title">SUV</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='sedan') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-car"></i></div>
+            <div class="category-card-title">Sedan</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='truck') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-truck-pickup"></i></div>
+            <div class="category-card-title">Pickup Truck</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='luxury') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-gem"></i></div>
+            <div class="category-card-title">Luxury</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='hatchback') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-car-alt"></i></div>
+            <div class="category-card-title">Hatchback</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='hybrid') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-leaf"></i></div>
+            <div class="category-card-title">Hybrid</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='car', category='convertible') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-wind"></i></div>
+            <div class="category-card-title">Convertible</div>
+        </a>
+    </div>
+    
+    <!-- Motorbike Categories -->
+    <h4 class="mt-5 mb-3">Motorbikes</h4>
+    <div class="category-grid">
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='sport') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-motorcycle"></i></div>
+            <div class="category-card-title">Sport Bikes</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='cruiser') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-road"></i></div>
+            <div class="category-card-title">Cruisers</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='touring') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-map-marked-alt"></i></div>
+            <div class="category-card-title">Touring</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='adventure') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-mountain"></i></div>
+            <div class="category-card-title">Adventure</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='dual-sport') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-biking"></i></div>
+            <div class="category-card-title">Dual Sport</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='scooter') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-tachometer-alt"></i></div>
+            <div class="category-card-title">Scooters</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='off-road') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-tree"></i></div>
+            <div class="category-card-title">Off-Road</div>
+        </a>
+        <a href="{{ url_for('vehicle_list', vehicle_type='motorbike', category='electric') }}" class="category-card">
+            <div class="category-card-icon"><i class="fas fa-charging-station"></i></div>
+            <div class="category-card-title">Electric Bikes</div>
+        </a>
+    </div>
+</section>
+
+<section class="featured-vehicles mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Featured Vehicles</h2>
+        <a href="{{ url_for('vehicle_list') }}" class="btn btn-outline-primary">View All</a>
+    </div>
+    
+    <div class="row">
+        {% if featured_vehicles %}
+            {% for vehicle in featured_vehicles %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 vehicle-card">
+                        <div class="card-img-container">
+                            {% if vehicle.image_urls %}
+                                <img src="{{ vehicle.image_urls.split(',')[0] }}" class="card-img-top" alt="{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/350x200?text=No+Image" class="card-img-top" alt="No Image">
+                            {% endif %}
+                            <div class="card-img-overlay d-flex flex-column justify-content-end">
+                                <span class="badge bg-primary">{{ vehicle.condition|title }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}</h5>
+                            <p class="card-subtitle text-muted mb-2">{{ vehicle.year }} • {{ vehicle.mileage|default('0') }} km</p>
+                            <p class="price mb-2 fw-bold">{{ vehicle.price|currency }}</p>
+                            <div class="d-flex flex-wrap mb-2">
+                                <span class="badge bg-secondary me-1 mb-1">{{ vehicle.transmission|title }}</span>
+                                <span class="badge bg-secondary me-1 mb-1">{{ vehicle.fuel_type|title }}</span>
+                                <span class="badge bg-secondary me-1 mb-1">{{ vehicle.country }}</span>
+                            </div>
+                            <p class="location small"><i class="fas fa-map-marker-alt"></i> {{ vehicle.location }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="btn btn-outline-primary w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No vehicles currently available. Check back soon!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="services-section mb-5">
+    <h2 class="mb-4">Our Services</h2>
+    
+    <!-- Car Services -->
+    <h4 class="mb-3">Car Services</h4>
+    <div class="row mb-4">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-car-crash fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Panel Beating</h3>
+                    <p class="card-text">Professional repair of vehicle body damage, from minor dents to major collision repairs.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-spray-can fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Painting</h3>
+                    <p class="card-text">High-quality painting services for your vehicle, from partial to complete resprays.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-tools fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Mechanical Repairs</h3>
+                    <p class="card-text">Comprehensive mechanical repairs and servicing for all car makes and models.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Motorcycle Services -->
+    <h4 class="mb-3">Motorcycle Services</h4>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-motorcycle fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Bike Tune-Up</h3>
+                    <p class="card-text">Complete motorcycle service and performance tuning for optimal riding experience.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-cogs fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Custom Modifications</h3>
+                    <p class="card-text">Personalized motorcycle modifications and custom builds to match your style and performance needs.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 service-card">
+                <div class="card-body text-center p-4">
+                    <div class="service-icon mb-3">
+                        <i class="fas fa-tachometer-alt fa-3x"></i>
+                    </div>
+                    <h3 class="card-title">Race Preparation</h3>
+                    <p class="card-text">Specialized services for race bikes including suspension setup, engine tuning and safety checks.</p>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="why-choose-us mb-5">
+    <h2 class="mb-4">Why Choose theGarage</h2>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="feature text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-check-circle fa-3x"></i>
+                </div>
+                <h4>Trusted Platform</h4>
+                <p>Verified sellers and quality assured service providers for cars and motorbikes</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="feature text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-hand-holding-usd fa-3x"></i>
+                </div>
+                <h4>Competitive Pricing</h4>
+                <p>Great deals on all vehicles and fair pricing on maintenance services</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="feature text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-calendar-check fa-3x"></i>
+                </div>
+                <h4>Easy Booking</h4>
+                <p>Simple online booking system for all automotive and motorcycle services</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="feature text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+                <h4>Expert Technicians</h4>
+                <p>Skilled professionals for both car and motorcycle repairs and customization</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="card bg-primary text-white">
+        <div class="card-body p-5 text-center">
+            <h2 class="mb-3">Ready to get started?</h2>
+            <p class="lead mb-4">Join thousands of satisfied customers across South Africa and Zimbabwe.</p>
+            <div class="d-flex justify-content-center gap-3">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_vehicle') }}" class="btn btn-light btn-lg">Sell Your Vehicle</a>
+                    <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-light btn-lg">Book a Service</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">Register Now</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

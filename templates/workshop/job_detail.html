@@ -1,0 +1,241 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">Job #{{ job.id }}: {{ job.booking.service_type.name }}</h1>
+                <div>
+                    <a href="{{ url_for('workshop_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Status and Info -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Job Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong> <span class="badge {{ job.status | job_status_class }}">{{ job.status.replace('_', ' ').title() }}</span></p>
+                            <p><strong>Priority:</strong> {{ job.priority | priority_badge | safe }}</p>
+                            <p><strong>Estimated Hours:</strong> {{ job.estimated_hours }}</p>
+                            <p><strong>Actual Hours:</strong> {{ job.actual_hours if job.actual_hours else 'Not completed' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> {{ job.booking.customer.full_name() }}</p>
+                            <p><strong>Mechanic:</strong> 
+                                {% if job.mechanic %}
+                                    {{ job.mechanic.full_name() }}
+                                {% else %}
+                                    <span class="text-muted">Unassigned</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Created:</strong> {{ job.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            <p><strong>Start Time:</strong> {{ job.start_time.strftime('%Y-%m-%d %H:%M') if job.start_time else 'Not started' }}</p>
+                            <p><strong>End Time:</strong> {{ job.end_time.strftime('%Y-%m-%d %H:%M') if job.end_time else 'Not completed' }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Booking Details -->
+                    <div class="mt-4">
+                        <h4>Booking Details</h4>
+                        <p><strong>Service:</strong> {{ job.booking.service_type.name }}</p>
+                        <p><strong>Vehicle:</strong> 
+                            {% if job.booking.vehicle %}
+                                {{ job.booking.vehicle.vehicle_make.name }} {{ job.booking.vehicle.vehicle_model.name }} ({{ job.booking.vehicle.year }})
+                            {% else %}
+                                Customer's vehicle
+                            {% endif %}
+                        </p>
+                        <p><strong>Booking Date:</strong> {{ job.booking.booking_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Booking Time:</strong> {{ job.booking.booking_time.strftime('%H:%M') }}</p>
+                        {% if job.booking.notes %}
+                        <p><strong>Booking Notes:</strong> {{ job.booking.notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Job Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3>Job Actions</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Update Status Form -->
+                    <form method="POST" action="{{ url_for('update_job_status', job_id=job.id) }}" class="mb-3">
+                        {{ status_form.csrf_token }}
+                        <div class="mb-3">
+                            {{ status_form.status.label(class="form-label") }}
+                            {{ status_form.status(class="form-select") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ status_form.note.label(class="form-label") }}
+                            {{ status_form.note(class="form-control", rows=2) }}
+                        </div>
+                        {{ status_form.submit(class="btn btn-primary w-100") }}
+                    </form>
+                    
+                    <!-- Start Work Button (if job is pending) -->
+                    {% if start_work_form %}
+                    <form method="POST" action="{{ url_for('start_job_work', job_id=job.id) }}" class="mb-3">
+                        {{ start_work_form.csrf_token }}
+                        {{ start_work_form.submit(class="btn btn-success w-100") }}
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Complete Work Form (if job is in progress) -->
+                    {% if complete_work_form %}
+                    <form method="POST" action="{{ url_for('complete_job_work', job_id=job.id) }}">
+                        {{ complete_work_form.csrf_token }}
+                        <div class="mb-3">
+                            {{ complete_work_form.actual_hours.label(class="form-label") }}
+                            {{ complete_work_form.actual_hours(class="form-control") }}
+                        </div>
+                        <div class="mb-3">
+                            {{ complete_work_form.note.label(class="form-label") }}
+                            {{ complete_work_form.note(class="form-control", rows=2) }}
+                        </div>
+                        {{ complete_work_form.submit(class="btn btn-success w-100") }}
+                    </form>
+                    {% endif %}
+                    
+                    <!-- Add Part Button -->
+                    {% if job.status in ['pending', 'in_progress'] %}
+                    <a href="{{ url_for('add_part_to_job', job_id=job.id) }}" class="btn btn-warning w-100 mt-3">Add Parts to Job</a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Cost Summary (if job has parts or is completed) -->
+            {% if parts_used or job.actual_hours %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3>Cost Summary</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            {% if parts_used %}
+                            <tr>
+                                <td><strong>Parts Cost:</strong></td>
+                                <td class="text-end">{{ total_parts_cost | currency }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if job.actual_hours %}
+                            <tr>
+                                <td><strong>Labor ({{ job.actual_hours }} hours):</strong></td>
+                                <td class="text-end">{{ labor_cost | currency }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if parts_used or job.actual_hours %}
+                            <tr class="table-primary">
+                                <td><strong>Total:</strong></td>
+                                <td class="text-end"><strong>{{ (total_parts_cost + labor_cost) | currency }}</strong></td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Parts Used -->
+    {% if parts_used %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Parts Used</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Part Name</th>
+                                    <th>Part Number</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for part_used in parts_used %}
+                                <tr>
+                                    <td>{{ part_used.part.name }}</td>
+                                    <td>{{ part_used.part.part_number }}</td>
+                                    <td>{{ part_used.quantity }}</td>
+                                    <td>{{ part_used.unit_price | currency }}</td>
+                                    <td>{{ (part_used.unit_price * part_used.quantity) | currency }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary">
+                                    <td colspan="4" class="text-end"><strong>Total Parts Cost:</strong></td>
+                                    <td><strong>{{ total_parts_cost | currency }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Job Notes -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Job Notes</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Add Note Form -->
+                    <form method="POST" action="{{ url_for('add_job_note', job_id=job.id) }}" class="mb-4">
+                        {{ note_form.csrf_token }}
+                        <div class="row">
+                            <div class="col-md-10">
+                                {{ note_form.note(class="form-control", placeholder="Add a note about this job...") }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ note_form.submit(class="btn btn-primary w-100") }}
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Notes List -->
+                    {% if job.job_notes %}
+                    <div class="list-group">
+                        {% for note in job.job_notes|sort(attribute='created_at', reverse=True) %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ note.author.full_name() }}</h5>
+                                <small>{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1">{{ note.note }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No notes for this job yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

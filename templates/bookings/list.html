@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1 class="mb-4">My Bookings</h1>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="lead mb-0">Manage your service appointments</p>
+            <a href="{{ url_for('create_booking') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Book New Service
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Your Bookings</h4>
+            </div>
+            <div class="card-body">
+                {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Vehicle</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                    <tr>
+                                        <td>#{{ booking.id }}</td>
+                                        <td>{{ booking.service_type.name }}</td>
+                                        <td>{{ booking.booking_date.strftime('%d %b, %Y') }} at {{ booking.booking_time.strftime('%I:%M %p') }}</td>
+                                        <td>
+                                            {% if booking.vehicle %}
+                                                <a href="{{ url_for('vehicle_detail', vehicle_id=booking.vehicle.id) }}">
+                                                    {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }}
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if booking.status == 'pending' %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% elif booking.status == 'confirmed' %}
+                                                <span class="badge bg-success">Confirmed</span>
+                                            {% elif booking.status == 'completed' %}
+                                                <span class="badge bg-info">Completed</span>
+                                            {% elif booking.status == 'cancelled' %}
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if booking.notes %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="popover" data-bs-placement="left" title="Booking Notes" data-bs-content="{{ booking.notes }}">
+                                                    <i class="fas fa-sticky-note"></i> View
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted">No notes</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-4x mb-3 text-muted"></i>
+                        <h4>No Bookings Found</h4>
+                        <p class="text-muted mb-4">You haven't made any service bookings yet.</p>
+                        <a href="{{ url_for('create_booking') }}" class="btn btn-primary">Book Your First Service</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Booking Information</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        <strong>Pending:</strong> Your booking is awaiting confirmation from our team
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-check-circle me-2 text-success"></i>
+                        <strong>Confirmed:</strong> Your booking has been approved and scheduled
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-clipboard-check me-2 text-info"></i>
+                        <strong>Completed:</strong> The service has been completed
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-times-circle me-2 text-danger"></i>
+                        <strong>Cancelled:</strong> The booking has been cancelled
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Need Help?</h4>
+            </div>
+            <div class="card-body">
+                <p>If you need to modify or cancel a booking, please contact our service team:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-phone me-2"></i> Call: +27 10 123 4567
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-envelope me-2"></i> Email: service@glackon-garagehub.com
+                    </li>
+                    <li>
+                        <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                        <small>Please note: Cancellations less than 24 hours before your appointment may incur a fee</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize popovers
+    const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    popoverTriggerList.map(function(popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+});
+</script>
+{% endblock %}

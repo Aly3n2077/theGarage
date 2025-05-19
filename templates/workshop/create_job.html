@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Create Workshop Job</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('workshop_bookings') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Bookings</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Booking Details -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3>Booking Details</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Booking ID:</strong> {{ booking.id }}</p>
+                    <p><strong>Customer:</strong> {{ booking.customer.full_name() }}</p>
+                    <p><strong>Service:</strong> {{ booking.service_type.name }}</p>
+                    <p><strong>Vehicle:</strong> 
+                        {% if booking.vehicle %}
+                            {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }} ({{ booking.vehicle.year }})
+                        {% else %}
+                            Customer's vehicle
+                        {% endif %}
+                    </p>
+                    <p><strong>Booking Date:</strong> {{ booking.booking_date.strftime('%Y-%m-%d') }}</p>
+                    <p><strong>Booking Time:</strong> {{ booking.booking_time.strftime('%H:%M') }}</p>
+                    {% if booking.notes %}
+                    <p><strong>Booking Notes:</strong> {{ booking.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <!-- Create Job Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Job Details</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('create_job', booking_id=booking.id) }}">
+                        {{ form.csrf_token }}
+                        
+                        <div class="mb-3">
+                            {{ form.mechanic_id.label(class="form-label") }}
+                            {{ form.mechanic_id(class="form-select") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.estimated_hours.label(class="form-label") }}
+                            {{ form.estimated_hours(class="form-control") }}
+                            <div class="form-text">Estimated time to complete this job in hours</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.priority.label(class="form-label") }}
+                            {{ form.priority(class="form-select") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="4") }}
+                            <div class="form-text">Initial notes for the job (optional)</div>
+                        </div>
+                        
+                        {{ form.submit(class="btn btn-success w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

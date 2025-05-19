@@ -1,0 +1,253 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- Search Panel Inspired by Cars.com -->
+<section class="search-panel mb-4 bg-light rounded-3 p-3 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0"><i class="fas fa-search me-2"></i>Find Your Perfect Vehicle</h4>
+        <button class="btn btn-sm btn-outline-primary d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+            <i class="fas fa-filter me-1"></i> Filters
+        </button>
+    </div>
+    
+    <div class="collapse d-md-block" id="filterCollapse">
+        <form method="GET" action="{{ url_for('vehicle_list') }}" id="vehicleFilterForm" class="row g-3">
+            <div class="col-md-3 col-6">
+                {{ form.make_id.label(class="form-label small") }}
+                {{ form.make_id(class="form-select form-select-sm", id="makeSelect") }}
+            </div>
+            
+            <div class="col-md-3 col-6">
+                {{ form.model_id.label(class="form-label small") }}
+                {{ form.model_id(class="form-select form-select-sm", id="modelSelect") }}
+            </div>
+            
+            <div class="col-md-3 col-6">
+                {{ form.condition.label(class="form-label small") }}
+                {{ form.condition(class="form-select form-select-sm") }}
+            </div>
+            
+            <div class="col-md-3 col-6">
+                {{ form.country.label(class="form-label small") }}
+                {{ form.country(class="form-select form-select-sm") }}
+            </div>
+            
+            <div class="col-md-3 col-6">
+                <label class="form-label small">Price Range</label>
+                <div class="input-group input-group-sm">
+                    {{ form.min_price(class="form-control", placeholder="Min") }}
+                    <span class="input-group-text">-</span>
+                    {{ form.max_price(class="form-control", placeholder="Max") }}
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-6">
+                <label class="form-label small">Year Range</label>
+                <div class="input-group input-group-sm">
+                    {{ form.min_year(class="form-control", placeholder="Min") }}
+                    <span class="input-group-text">-</span>
+                    {{ form.max_year(class="form-control", placeholder="Max") }}
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-6">
+                {{ form.fuel_type.label(class="form-label small") }}
+                {{ form.fuel_type(class="form-select form-select-sm") }}
+            </div>
+            
+            <div class="col-md-3 col-6">
+                {{ form.transmission.label(class="form-label small") }}
+                {{ form.transmission(class="form-select form-select-sm") }}
+            </div>
+            
+            <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative">
+                            {{ form.location(class="form-control form-control-sm", placeholder="Enter location", style="width: 180px;") }}
+                            <i class="fas fa-map-marker-alt position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%);"></i>
+                        </div>
+                        <div>
+                            {{ form.submit(class="btn btn-primary btn-sm ms-2") }}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <a href="{{ url_for('vehicle_list') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-sync-alt me-1"></i> Reset
+                        </a>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('create_vehicle') }}" class="btn btn-success btn-sm ms-2">
+                                <i class="fas fa-plus me-1"></i> Sell Your Vehicle
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Results Section -->
+<div class="row">
+    <div class="col-12 mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <h1 class="h3 mb-0">Browse Vehicles</h1>
+                <span class="badge bg-primary ms-2" id="vehicleCount">{{ vehicles|length }}</span>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-outline-primary btn-sm active" id="gridViewBtn">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm" id="listViewBtn">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12">
+        <!-- Grid View -->
+        <div class="row" id="gridView">
+            {% if vehicles %}
+                {% for vehicle in vehicles %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 vehicle-card shadow-sm">
+                            <div class="card-img-container position-relative">
+                                {% if vehicle.image_urls %}
+                                    <img src="{{ vehicle.image_urls.split(',')[0] }}" class="card-img-top" alt="{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/350x200?text=No+Image" class="card-img-top" alt="No Image">
+                                {% endif %}
+                                <div class="card-badges position-absolute" style="top: 10px; right: 10px;">
+                                    <span class="badge bg-primary">{{ vehicle.condition|title }}</span>
+                                    {% if vehicle.created_at and (vehicle.created_at > (now - timedelta(days=7))) %}
+                                        <span class="badge bg-success">New</span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-img-overlay d-flex align-items-end p-0">
+                                    <div class="w-100 bg-dark bg-opacity-50 p-2">
+                                        <h5 class="card-title text-white mb-0">{{ vehicle.year }} {{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="price fw-bold text-primary mb-0">{{ vehicle.price|currency }}</h5>
+                                    <span class="text-muted small">{{ vehicle.mileage|default('0') }} km</span>
+                                </div>
+                                <div class="d-flex flex-wrap mb-2">
+                                    <span class="badge bg-secondary me-1 mb-1">{{ vehicle.transmission|title }}</span>
+                                    <span class="badge bg-secondary me-1 mb-1">{{ vehicle.fuel_type|title }}</span>
+                                    <span class="badge bg-secondary me-1 mb-1">{{ vehicle.country }}</span>
+                                </div>
+                                <p class="location small mb-0"><i class="fas fa-map-marker-alt text-danger"></i> {{ vehicle.location }}</p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="btn btn-outline-primary w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">No vehicles found!</h4>
+                        <p>No vehicles match your search criteria. Try adjusting your filters or check back later.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- List View (hidden by default) -->
+        <div id="listView" class="d-none">
+            {% if vehicles %}
+                {% for vehicle in vehicles %}
+                    <div class="card mb-3 shadow-sm vehicle-list-item">
+                        <div class="row g-0">
+                            <div class="col-md-4 position-relative">
+                                {% if vehicle.image_urls %}
+                                    <img src="{{ vehicle.image_urls.split(',')[0] }}" class="img-fluid rounded-start h-100 w-100 object-fit-cover" alt="{{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}" style="max-height: 200px;">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/350x200?text=No+Image" class="img-fluid rounded-start" alt="No Image">
+                                {% endif %}
+                                <div class="position-absolute" style="top: 10px; right: 10px;">
+                                    <span class="badge bg-primary">{{ vehicle.condition|title }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title">{{ vehicle.year }} {{ vehicle.vehicle_make.name }} {{ vehicle.vehicle_model.name }}</h5>
+                                        <h5 class="price fw-bold text-primary">{{ vehicle.price|currency }}</h5>
+                                    </div>
+                                    <p class="card-text text-muted">{{ vehicle.mileage|default('0') }} km • {{ vehicle.fuel_type|title }} • {{ vehicle.transmission|title }}</p>
+                                    <p class="card-text small"><i class="fas fa-map-marker-alt text-danger"></i> {{ vehicle.location }}, {{ vehicle.country }}</p>
+                                    <p class="card-text small text-muted">
+                                        {% if vehicle.description %}
+                                            {{ vehicle.description|truncate(100) }}
+                                        {% else %}
+                                            No description available.
+                                        {% endif %}
+                                    </p>
+                                    <div class="d-flex justify-content-end">
+                                        <a href="{{ url_for('vehicle_detail', vehicle_id=vehicle.id) }}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    <h4 class="alert-heading">No vehicles found!</h4>
+                    <p>No vehicles match your search criteria. Try adjusting your filters or check back later.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vehicle_filter.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Grid/List View toggle
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        
+        if(gridViewBtn && listViewBtn && gridView && listView) {
+            gridViewBtn.addEventListener('click', function() {
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                gridView.classList.remove('d-none');
+                listView.classList.add('d-none');
+                
+                // Save preference in localStorage
+                localStorage.setItem('vehicleViewPreference', 'grid');
+            });
+            
+            listViewBtn.addEventListener('click', function() {
+                listViewBtn.classList.add('active');
+                gridViewBtn.classList.remove('active');
+                listView.classList.remove('d-none');
+                gridView.classList.add('d-none');
+                
+                // Save preference in localStorage
+                localStorage.setItem('vehicleViewPreference', 'list');
+            });
+            
+            // Check saved preference
+            const savedPreference = localStorage.getItem('vehicleViewPreference');
+            if(savedPreference === 'list') {
+                listViewBtn.click();
+            }
+        }
+    });
+</script>
+{% endblock %}

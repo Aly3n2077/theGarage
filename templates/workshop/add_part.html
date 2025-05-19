@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Add Parts to Job #{{ job.id }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Job</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Job Details -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3>Job Details</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Job ID:</strong> {{ job.id }}</p>
+                    <p><strong>Service:</strong> {{ job.booking.service_type.name }}</p>
+                    <p><strong>Customer:</strong> {{ job.booking.customer.full_name() }}</p>
+                    <p><strong>Vehicle:</strong> 
+                        {% if job.booking.vehicle %}
+                            {{ job.booking.vehicle.vehicle_make.name }} {{ job.booking.vehicle.vehicle_model.name }} ({{ job.booking.vehicle.year }})
+                        {% else %}
+                            Customer's vehicle
+                        {% endif %}
+                    </p>
+                    <p><strong>Status:</strong> <span class="badge {{ job.status | job_status_class }}">{{ job.status.replace('_', ' ').title() }}</span></p>
+                </div>
+            </div>
+            
+            <!-- Current Parts -->
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Current Parts</h3>
+                </div>
+                <div class="card-body">
+                    {% set parts_used = job.parts_used %}
+                    {% if parts_used %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Part</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for part_used in parts_used %}
+                                <tr>
+                                    <td>{{ part_used.part.name }}</td>
+                                    <td>{{ part_used.quantity }}</td>
+                                    <td>{{ part_used.unit_price | currency }}</td>
+                                    <td>{{ (part_used.unit_price * part_used.quantity) | currency }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary">
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td><strong>{{ parts_used|sum(attribute=lambda p: p.unit_price * p.quantity) | currency }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No parts added to this job yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <!-- Add Part Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Add Parts</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('add_part_to_job', job_id=job.id) }}">
+                        {{ form.csrf_token }}
+                        
+                        <div class="mb-3">
+                            {{ form.part_id.label(class="form-label") }}
+                            {{ form.part_id(class="form-select") }}
+                            {% if form.part_id.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.part_id.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.quantity.label(class="form-label") }}
+                            {{ form.quantity(class="form-control") }}
+                            {% if form.quantity.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.quantity.errors %}
+                                <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Number of parts to add to this job</div>
+                        </div>
+                        
+                        {{ form.submit(class="btn btn-success w-100") }}
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Low Stock Alert -->
+            <div class="card mt-4">
+                <div class="card-header bg-danger text-white">
+                    <h3>Low Stock Alert</h3>
+                </div>
+                <div class="card-body">
+                    <p>The following parts are low in stock and need to be reordered:</p>
+                    
+                    {% set low_stock_parts = parts|selectattr('quantity_in_stock', 'lt', 5)|list %}
+                    
+                    {% if low_stock_parts %}
+                    <ul class="list-group">
+                        {% for part in low_stock_parts %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ part.name }} ({{ part.part_number }})
+                            <span class="badge bg-danger rounded-pill">{{ part.quantity_in_stock }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-center text-muted">No parts are currently low in stock.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

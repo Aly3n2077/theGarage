@@ -1,0 +1,221 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Workshop Dashboard</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <h2>Overview</h2>
+                <div>
+                    <a href="{{ url_for('workshop_jobs') }}" class="btn btn-primary me-2">All Jobs</a>
+                    <a href="{{ url_for('workshop_bookings') }}" class="btn btn-primary me-2">Bookings</a>
+                    <a href="{{ url_for('parts_inventory') }}" class="btn btn-primary">Parts Inventory</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Jobs</h5>
+                    <p class="card-text display-4">{{ stats.total_jobs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Jobs</h5>
+                    <p class="card-text display-4">{{ stats.pending_jobs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">In Progress</h5>
+                    <p class="card-text display-4">{{ stats.in_progress_jobs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Completed</h5>
+                    <p class="card-text display-4">{{ stats.completed_jobs }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Assigned Jobs (For Mechanics) -->
+    {% if current_user.role == 'mechanic' and my_jobs %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>My Assigned Jobs</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Job #</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in my_jobs %}
+                                <tr>
+                                    <td>{{ job.id }}</td>
+                                    <td>{{ job.booking.customer.full_name() }}</td>
+                                    <td>{{ job.booking.service_type.name }}</td>
+                                    <td><span class="badge {{ job.status | job_status_class }}">{{ job.status.replace('_', ' ').title() }}</span></td>
+                                    <td>{{ job.priority | priority_badge | safe }}</td>
+                                    <td>{{ job.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pending Jobs -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Pending Jobs</h3>
+                </div>
+                <div class="card-body">
+                    {% if pending_jobs %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Job #</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Priority</th>
+                                    <th>Mechanic</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in pending_jobs %}
+                                <tr>
+                                    <td>{{ job.id }}</td>
+                                    <td>{{ job.booking.customer.full_name() }}</td>
+                                    <td>{{ job.booking.service_type.name }}</td>
+                                    <td>
+                                        {% if job.booking.vehicle %}
+                                            {{ job.booking.vehicle.vehicle_make.name }} {{ job.booking.vehicle.vehicle_model.name }}
+                                        {% else %}
+                                            Customer's vehicle
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ job.priority | priority_badge | safe }}</td>
+                                    <td>
+                                        {% if job.mechanic %}
+                                            {{ job.mechanic.full_name() }}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ job.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No pending jobs at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Jobs -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3>In Progress Jobs</h3>
+                </div>
+                <div class="card-body">
+                    {% if in_progress_jobs %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Job #</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Mechanic</th>
+                                    <th>Started</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in in_progress_jobs %}
+                                <tr>
+                                    <td>{{ job.id }}</td>
+                                    <td>{{ job.booking.customer.full_name() }}</td>
+                                    <td>{{ job.booking.service_type.name }}</td>
+                                    <td>
+                                        {% if job.booking.vehicle %}
+                                            {{ job.booking.vehicle.vehicle_make.name }} {{ job.booking.vehicle.vehicle_model.name }}
+                                        {% else %}
+                                            Customer's vehicle
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if job.mechanic %}
+                                            {{ job.mechanic.full_name() }}
+                                        {% else %}
+                                            <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ job.start_time.strftime('%Y-%m-%d %H:%M') if job.start_time else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No jobs in progress at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">Service Booking</h1>
+        <p class="lead">Book panel beating, painting, or mechanical repairs for your vehicle</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Our Services</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for service in services %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 service-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ service.name }}</h5>
+                                    <p class="price mb-2">{{ service.price_estimate|currency }}</p>
+                                    <p class="card-text">{{ service.description }}</p>
+                                    <p class="text-muted small mb-3">
+                                        <i class="fas fa-clock me-1"></i> Approx. {{ service.duration_hours }} hours
+                                    </p>
+                                    <a href="{{ url_for('create_booking', service_id=service.id) }}" class="btn btn-outline-primary">Book Now</a>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <span class="badge bg-secondary">{{ service.category|replace('_', ' ')|title }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Available Dates</h4>
+            </div>
+            <div class="card-body">
+                <div class="calendar-wrapper mb-3">
+                    <div id="booking-calendar"></div>
+                </div>
+                
+                <div id="selected-date-info" class="d-none">
+                    <h5 class="mb-3">Available Time Slots: <span id="selected-date-display"></span></h5>
+                    <div id="time-slots" class="d-flex flex-wrap gap-2 mb-3">
+                        <!-- Time slots will be inserted here via JavaScript -->
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a id="booking-link" href="{{ url_for('create_booking') }}" class="btn btn-primary">
+                            Continue to Booking
+                        </a>
+                    </div>
+                </div>
+                
+                <div id="calendar-instructions" class="alert alert-info mt-3">
+                    <p class="mb-0"><i class="fas fa-info-circle me-2"></i> Select a date to view available time slots.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Contact Us</h4>
+            </div>
+            <div class="card-body">
+                <p><i class="fas fa-phone me-2"></i> Call us: +27 10 123 4567</p>
+                <p><i class="fas fa-envelope me-2"></i> Email: service@glackon-garagehub.com</p>
+                <p class="mb-0"><i class="fas fa-map-marker-alt me-2"></i> Locations:</p>
+                <ul>
+                    <li>Johannesburg, South Africa</li>
+                    <li>Harare, Zimbabwe</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Why Choose Our Service</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-tools fa-3x mb-3 text-primary"></i>
+                            <h5>Expert Technicians</h5>
+                            <p>Our skilled professionals deliver quality workmanship</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-certificate fa-3x mb-3 text-primary"></i>
+                            <h5>Quality Guaranteed</h5>
+                            <p>All repairs come with our satisfaction guarantee</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-hand-holding-usd fa-3x mb-3 text-primary"></i>
+                            <h5>Competitive Pricing</h5>
+                            <p>Fair and transparent pricing on all services</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-clock fa-3x mb-3 text-primary"></i>
+                            <h5>Quick Turnaround</h5>
+                            <p>Efficient service to get you back on the road faster</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}

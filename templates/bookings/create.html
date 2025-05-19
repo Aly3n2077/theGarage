@@ -1,0 +1,269 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">Book a Service</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Service Information</h4>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            {{ form.service_id.label(class="form-label") }}
+                            {% if form.service_id.errors %}
+                                {{ form.service_id(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.service_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.service_id(class="form-select") }}
+                            {% endif %}
+                            <div id="service-details" class="mt-2 p-3 border rounded d-none">
+                                <p id="service-description" class="mb-2"></p>
+                                <div class="d-flex justify-content-between">
+                                    <span id="service-duration" class="text-muted small"></span>
+                                    <span id="service-price" class="fw-bold"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Appointment Date & Time</h4>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.booking_date.label(class="form-label") }}
+                            {% if form.booking_date.errors %}
+                                {{ form.booking_date(class="form-control is-invalid", id="datePicker") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.booking_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.booking_date(class="form-control", id="datePicker") }}
+                            {% endif %}
+                            <small class="text-muted">Select a date for your appointment</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.booking_time.label(class="form-label") }}
+                            {% if form.booking_time.errors %}
+                                {{ form.booking_time(class="form-select is-invalid", id="timeSelect") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.booking_time.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.booking_time(class="form-select", id="timeSelect") }}
+                            {% endif %}
+                            <small class="text-muted">Available time slots will appear after selecting a date</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Vehicle Information</h4>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            {{ form.vehicle_id.label(class="form-label") }}
+                            {% if form.vehicle_id.errors %}
+                                {{ form.vehicle_id(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.vehicle_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.vehicle_id(class="form-select") }}
+                            {% endif %}
+                            <small class="text-muted">Select a vehicle or choose "No Vehicle" if bringing another vehicle</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="form-section-title">Additional Notes</h4>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {% if form.notes.errors %}
+                                {{ form.notes(class="form-control is-invalid", rows=3) }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.notes.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.notes(class="form-control", rows=3) }}
+                            {% endif %}
+                            <small class="text-muted">Please provide any additional details about the service needed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <a href="{{ url_for('booking_calendar') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">Booking Information</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        <strong>Payment:</strong> Payment will be collected at the time of service
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        <strong>Cancellation:</strong> Please cancel at least 24 hours in advance
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        <strong>Confirmation:</strong> You will receive a confirmation email once your booking is approved
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const datePicker = document.getElementById('datePicker');
+    const timeSelect = document.getElementById('timeSelect');
+    const serviceSelect = document.getElementById('service_id');
+    const serviceDetails = document.getElementById('service-details');
+    const serviceDescription = document.getElementById('service-description');
+    const serviceDuration = document.getElementById('service-duration');
+    const servicePrice = document.getElementById('service-price');
+    
+    // Initialize date picker
+    flatpickr(datePicker, {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        disable: [
+            function(date) {
+                // Disable weekends (Saturday is 6, Sunday is 0)
+                return (date.getDay() === 0);
+            }
+        ],
+        onChange: function(selectedDates, dateStr) {
+            updateTimeSlots(dateStr);
+        }
+    });
+    
+    // Function to update time slots based on selected date
+    function updateTimeSlots(dateStr) {
+        if (!dateStr) return;
+        
+        // Clear current options
+        timeSelect.innerHTML = '';
+        
+        // Add loading option
+        const loadingOption = document.createElement('option');
+        loadingOption.textContent = 'Loading available times...';
+        timeSelect.appendChild(loadingOption);
+        
+        // Fetch available time slots
+        fetch(`/api/timeslots/${dateStr}`)
+            .then(response => response.json())
+            .then(data => {
+                // Clear the loading option
+                timeSelect.innerHTML = '';
+                
+                // Add placeholder
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = 'Select a time';
+                timeSelect.appendChild(placeholderOption);
+                
+                // Add the available time slots
+                if (data.available && data.available.length > 0) {
+                    data.available.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.value;
+                        option.textContent = slot.label;
+                        timeSelect.appendChild(option);
+                    });
+                } else {
+                    const noSlotsOption = document.createElement('option');
+                    noSlotsOption.value = '';
+                    noSlotsOption.textContent = 'No available times for this date';
+                    noSlotsOption.disabled = true;
+                    timeSelect.appendChild(noSlotsOption);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching time slots:', error);
+                timeSelect.innerHTML = '';
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'Error loading times, please try again';
+                timeSelect.appendChild(errorOption);
+            });
+    }
+    
+    // Initialize time slots if date is already selected
+    if (datePicker.value) {
+        updateTimeSlots(datePicker.value);
+    }
+    
+    // Service details
+    const services = {
+        {% for service in Service.query.all() %}
+        "{{ service.id }}": {
+            "description": "{{ service.description }}",
+            "duration": "{{ service.duration_hours }} hours",
+            "price": "{{ service.price_estimate|currency }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    
+    // Update service details when selection changes
+    serviceSelect.addEventListener('change', function() {
+        const selectedServiceId = this.value;
+        if (selectedServiceId && services[selectedServiceId]) {
+            serviceDescription.textContent = services[selectedServiceId].description;
+            serviceDuration.textContent = `Duration: ${services[selectedServiceId].duration}`;
+            servicePrice.textContent = `Estimated price: ${services[selectedServiceId].price}`;
+            serviceDetails.classList.remove('d-none');
+        } else {
+            serviceDetails.classList.add('d-none');
+        }
+    });
+    
+    // Trigger change event to show initial service details if pre-selected
+    if (serviceSelect.value) {
+        serviceSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+{% endblock %}

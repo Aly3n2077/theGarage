@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Workshop Bookings</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ url_for('workshop_dashboard') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                <div>
+                    <a href="{{ url_for('workshop_jobs') }}" class="btn btn-primary">View Jobs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bookings Without Jobs -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3>Bookings Awaiting Job Cards</h3>
+                </div>
+                <div class="card-body">
+                    {% if bookings_without_jobs %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Booking #</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Date & Time</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings_without_jobs %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.customer.full_name() }}</td>
+                                    <td>{{ booking.service_type.name }}</td>
+                                    <td>
+                                        {% if booking.vehicle %}
+                                            {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }}
+                                        {% else %}
+                                            Customer's vehicle
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ booking.booking_date.strftime('%Y-%m-%d') }} at {{ booking.booking_time.strftime('%H:%M') }}</td>
+                                    <td>
+                                        {% if booking.notes %}
+                                            <span class="text-truncate d-inline-block" style="max-width: 150px;" title="{{ booking.notes }}">{{ booking.notes }}</span>
+                                        {% else %}
+                                            <span class="text-muted">No notes</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('create_job', booking_id=booking.id) }}" class="btn btn-sm btn-success">Create Job</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No bookings awaiting job cards at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- All Confirmed Bookings -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>All Confirmed Bookings</h3>
+                </div>
+                <div class="card-body">
+                    {% if all_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Booking #</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Vehicle</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Job Card</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in all_bookings %}
+                                <tr>
+                                    <td>{{ booking.id }}</td>
+                                    <td>{{ booking.customer.full_name() }}</td>
+                                    <td>{{ booking.service_type.name }}</td>
+                                    <td>
+                                        {% if booking.vehicle %}
+                                            {{ booking.vehicle.vehicle_make.name }} {{ booking.vehicle.vehicle_model.name }}
+                                        {% else %}
+                                            Customer's vehicle
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ booking.booking_date.strftime('%Y-%m-%d') }} at {{ booking.booking_time.strftime('%H:%M') }}</td>
+                                    <td>
+                                        {% if booking.status == 'confirmed' %}
+                                            <span class="badge bg-primary">Confirmed</span>
+                                        {% elif booking.status == 'completed' %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ booking.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if booking.workshop_jobs %}
+                                            {% for job in booking.workshop_jobs %}
+                                                <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-info">Job #{{ job.id }}</a>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% if booking.status == 'confirmed' %}
+                                                <a href="{{ url_for('create_job', booking_id=booking.id) }}" class="btn btn-sm btn-outline-success">Create Job</a>
+                                            {% else %}
+                                                <span class="text-muted">No job card</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center">No confirmed bookings found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
